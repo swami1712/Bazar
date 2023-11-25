@@ -1,0 +1,38 @@
+li {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+.Navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  background-color: yellow;
+}
+
+.Header_left {
+  display: flex;
+}
+
+.Logo {
+  padding-right: 15px;
+}
+
+.Header_items {
+  display: flex;
+}
+
+.Header_items > li {
+  padding-right: 10px;
+}
+
+.Header_right {
+  display: flex;
+}
+
+.Header_right > div {
+  padding-left: 10px;
+}
