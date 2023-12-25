@@ -1,6 +1,4 @@
 import * as React from "react";
-import { useState } from "react";
-import axios from "axios";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -14,28 +12,53 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useSignInMutation } from "../Redux/Slices/userApiSlice";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import { logoutUser, setUser } from "../Redux/Slices/authSlice";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
 const defaultTheme = createTheme();
 
 export default function SignIn() {
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
+  // const [userName, setUserName] = useState("");
+  // const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { userInfo } = useSelector((state) => state.auth);
+  const [signIn, { isLoading }] = useSignInMutation();
 
-  const handleSubmit = (event) => {
+  const location = useLocation();
+  // console.log(location);
+  const sp = new URLSearchParams(location);
+  // const redirect = sp.get("redirect") || "/";
+  // navigate(redirect);
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    setUserName(data.get("userName"));
-    setPassword(data.get("password"));
-    axios
-      .post("http://localhost:5000/signin", { userName, password })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    try {
+      const data = new FormData(event.currentTarget);
+      // const name = data.get("userName");
+      // const pw = data.get("password");
+      const userName = data.get("userName");
+      const password = data.get("password");
+      const res = await signIn({ userName, password }).unwrap();
+
+      if (res.success) {
+        toast.success("login successfull");
+        dispatch(setUser({ ...res }));
+        navigate("/");
+      } else {
+        if (res.message === "All fields are required")
+          toast.warning("all fields are required");
+        else toast.error("invalid credentials");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -71,6 +94,7 @@ export default function SignIn() {
               name="userName"
               autoComplete="email"
               autoFocus
+              // onChange={(e) => setUserName(e.target.value)}
             />
             <TextField
               margin="normal"
@@ -81,6 +105,7 @@ export default function SignIn() {
               type="password"
               id="password"
               autoComplete="current-password"
+              // onChange={(e) => setPassword(e.target.value)}
             />
             <Button
               type="submit"

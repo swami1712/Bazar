@@ -1,6 +1,4 @@
 import * as React from "react";
-import { useState } from "react";
-import axios from "axios";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -14,31 +12,27 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-
-// TODO remove, this demo shouldn't need to reset the theme.
+import { useSignUpMutation } from "../Redux/Slices/userApiSlice";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const defaultTheme = createTheme();
 
 export default function SignUp() {
-  const [name, setName] = useState("");
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
+  const [SignUp, { isLoading }] = useSignUpMutation();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    setName(data.get("firstName") + " " + data.get("lastName"));
-    setUserName(data.get("userName"));
-    setPassword(data.get("password"));
+    const name = data.get("firstName") + " " + data.get("lastName");
+    const userName = data.get("userName");
+    const password = data.get("password");
 
-    axios
-      .post("http://localhost:5000/signup", { name, userName, password })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const res = await SignUp({ name, userName, password }).unwrap();
+    console.log(res);
+    if (res.success) {
+      toast.success("registered successfuly");
+    }
   };
 
   return (
@@ -119,7 +113,7 @@ export default function SignUp() {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link to="/signin" variant="body2">
                   Already have an account? Sign in
                 </Link>
               </Grid>

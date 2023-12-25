@@ -10,7 +10,7 @@ a {
   display: flex;
   justify-content: space-between;
   padding: 15px;
-  background-color: yellow;
+  background-color: black;
 }
 
 .Header_left {
@@ -19,6 +19,9 @@ a {
 
 .Logo {
   padding-right: 15px;
+  font-weight: 700;
+  color: black;
+  display: block;
 }
 
 .Header_items {

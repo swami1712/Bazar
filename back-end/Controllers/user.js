@@ -1,11 +1,12 @@
-const User = require("../Models/userModel");
+const User = require("../Models/usersModel.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const generateToken = require("../Utils/generateToken.js");
 require("dotenv").config;
 
 const handleSignin = async (req, res) => {
-  const { userName, password } = req.body;
   try {
+    const { userName, password } = req.body;
     if (!userName || !password) {
       return res.json({ message: "All fields are required" });
     }
@@ -21,16 +22,7 @@ const handleSignin = async (req, res) => {
     if (!passwordValidity) {
       return res.json({ message: "Invalid Credentials", success: false });
     }
-    const token = jwt.sign(
-      { id: checkUserName._id, name: checkUserName.name },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }
-    );
-    const maxEdge = 24 * 60 * 60;
-    res
-      .status(201)
-      .cookie("token", token, { maxEdge: maxEdge, httpOnly: true })
-      .json({ message: "login successfull", success: true });
+    generateToken(res, checkUserName);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -69,6 +61,14 @@ const handleSignup = async (req, res) => {
   }
 };
 
-const requireAuth = () => {};
+const userprofile = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const userDetails = await User.findById(userId);
+    res.status(201).json({ success: true, data: userDetails });
+  } catch (error) {
+    console.log("could not fetch user details due to an error " + error);
+  }
+};
 
-module.exports = { handleSignin, handleSignup };
+module.exports = { handleSignin, handleSignup, userprofile };
