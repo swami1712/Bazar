@@ -2,7 +2,6 @@ const express = require("express");
 const {
   addOrderItems,
   getOrderById,
-  updateOrderToPaid,
   getMyOrders,
   checkoutOrder,
   getKey,
@@ -17,6 +16,5 @@ router.route("/checkout").post(authenticate, checkoutOrder);
 router.route("/verifypayment").post(verifyPayment);
 router.route("/myorders").get(authenticate, getMyOrders);
 router.route("/:id").get(getOrderById);
-router.route("/:id/pay").put(updateOrderToPaid);
 
 module.exports = router;

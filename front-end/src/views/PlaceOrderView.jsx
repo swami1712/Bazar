@@ -67,7 +67,7 @@ const PlaceOrderView = () => {
         totalPrice: cart.totalPrice,
       }.unwrap();
       dispatch(clearCartItems());
-      console.log("hellow");
+      console.log("res => "+res);
       navigate(`/orderdetails/${res._id}`);
     } catch (err) {
       toast.error(err);

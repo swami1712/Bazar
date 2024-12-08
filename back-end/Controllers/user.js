@@ -2,30 +2,30 @@ const User = require("../Models/usersModel.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const generateToken = require("../Utils/generateToken.js");
+const response = require("../Utils/response.js");
 require("dotenv").config;
 
 const handleSignin = async (req, res) => {
+  const { userName, password } = req.body;
+  if (!userName || !password) {
+    return response.createError(res, "All fields are required");
+  }
+  const checkUserName = await User.findOne({ userName });
+  if (!checkUserName) {
+    return response.createError(res, "Invalid Credentials");
+  }
   try {
-    const { userName, password } = req.body;
-    if (!userName || !password) {
-      return res.json({ message: "All fields are required" });
-    }
-    const checkUserName = await User.findOne({ userName });
-    if (!checkUserName) {
-      return res.json({ message: "Invalid Credentials", success: false });
-    }
-
     const passwordValidity = await bcrypt.compare(
       password,
       checkUserName.password
     );
     if (!passwordValidity) {
-      return res.json({ message: "Invalid Credentials", success: false });
+      return response.createError(res, "Invalid Credentials");
     }
     generateToken(res, checkUserName);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    return response.createError(res, "Error signing in");
   }
 };
 
@@ -35,10 +35,10 @@ const handleSignup = async (req, res) => {
   const existingUser = await User.findOne({ userName });
 
   if (existingUser) {
-    return res.json({ message: "user already exists", success: false });
+    return response.createError(res, "User already exists");
   }
   if (!name || !userName || !password) {
-    return res.json({ message: "Enter all details", success: false });
+    return response.createError(res, "Kindly, Enter all details");
   }
 
   try {
@@ -51,13 +51,11 @@ const handleSignup = async (req, res) => {
         });
         await user.save();
 
-        res
-          .status(201)
-          .json({ message: "registration successful", success: true });
+        return response.createSuccess(res, "Registration successful...");
       });
     });
   } catch (error) {
-    res.status(401).json({ error: "could not register user" });
+    return response.createError(res, "Error registering user...");
   }
 };
 
@@ -65,7 +63,11 @@ const userprofile = async (req, res) => {
   try {
     const userId = req.params.id;
     const userDetails = await User.findById(userId);
-    res.status(201).json({ success: true, data: userDetails });
+    response.createSuccess(
+      res,
+      "User profile fetched succesfully",
+      userDetails
+    );
   } catch (error) {
     console.log("could not fetch user details due to an error " + error);
   }
